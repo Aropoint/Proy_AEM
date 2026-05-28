@@ -13,6 +13,8 @@ struct Solution {
 };
 
 // Algoritmo Greedy del paper Araya & Riff 2014
+// Añadir esta línea (sobrecarga)
 Solution greedySolve(Container& container, 
                      vector<Box>& boxes, 
-                     vector<Block>& blocks);
+                     vector<Block>& blocks,
+                     KnapsackCache& cache);

@@ -1,0 +1,493 @@
+BR0 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 1
+Volumen teórico utilizable: 99.8%
+
+Bloques generados: 20000 (tiempo: 0.074s)
+
+=== GREEDY ===
+Cajas colocadas: 105
+Utilización: 85.93%
+Volumen: 25855200 / 30089620
+Tiempo: 0.007s
+
+=== BEAM SEARCH (Double Effort) ===
+
+  w=1 → 85.93%  (tiempo: 0.01s)
+  w=2 → 85.93%  (tiempo: 0.01s)
+  w=3 → 85.93%  (tiempo: 0.01s)
+  w=5 → 85.93%  (tiempo: 0.02s)
+  w=8 → 85.93%  (tiempo: 0.02s)
+  w=12 → 91.66%  (tiempo: 0.62s)
+    ★ NUEVA MEJOR
+  w=17 → 85.93%  (tiempo: 0.02s)
+  w=25 → 85.93%  (tiempo: 0.03s)
+  w=36 → 91.66%  (tiempo: 0.06s)
+  w=51 → 91.66%  (tiempo: 0.42s)
+  w=73 → 87.56%  (tiempo: 1.72s)
+  w=104 → 89.20%  (tiempo: 8.43s)
+  w=148 → 85.93%  (tiempo: 19.24s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            85.93%
+Beam Search:       91.66%
+Teórico máximo:    99.84%
+
+Mejoría Beam Search sobre Greedy: 6.67%
+
+BR1 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 3
+Volumen teórico utilizable: 98.8%
+
+Bloques generados: 20000 (tiempo: 0.059s)
+
+=== GREEDY ===
+Cajas colocadas: 82
+Utilización: 68.29%
+Volumen: 20549370 / 30089620
+Tiempo: 0.070s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 59.28%  (tiempo: 0.24s)
+  w=2 → 83.28%  (tiempo: 0.15s)
+    ★ NUEVA MEJOR
+  w=3 → 79.19%  (tiempo: 0.67s)
+  w=5 → 78.65%  (tiempo: 1.43s)
+  w=8 → 86.29%  (tiempo: 1.80s)
+    ★ NUEVA MEJOR
+  w=12 → 83.71%  (tiempo: 4.63s)
+  w=17 → 84.39%  (tiempo: 13.25s)
+  w=25 → 49.04%  (tiempo: 8.56s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            68.29%
+Beam Search:       86.29%
+Teórico máximo:    98.83%
+
+Mejoría Beam Search sobre Greedy: 26.35%
+
+BR2 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 5
+Volumen teórico utilizable: 98.8%
+
+Bloques generados: 20000 (tiempo: 0.070s)
+
+=== GREEDY ===
+Cajas colocadas: 41
+Utilización: 55.22%
+Volumen: 16614002 / 30089620
+Tiempo: 0.130s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 61.89%  (tiempo: 0.32s)
+    ★ NUEVA MEJOR
+  w=2 → 68.41%  (tiempo: 1.12s)
+    ★ NUEVA MEJOR
+  w=3 → 83.19%  (tiempo: 1.97s)
+    ★ NUEVA MEJOR
+  w=5 → 74.83%  (tiempo: 5.07s)
+  w=8 → 79.75%  (tiempo: 13.38s)
+  w=12 → 23.06%  (tiempo: 9.44s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            55.22%
+Beam Search:       83.19%
+Teórico máximo:    98.82%
+
+Mejoría Beam Search sobre Greedy: 50.66%
+
+BR3 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 8
+Volumen teórico utilizable: 99.7%
+
+Bloques generados: 20000 (tiempo: 0.068s)
+
+=== GREEDY ===
+Cajas colocadas: 68
+Utilización: 68.08%
+Volumen: 20483616 / 30089620
+Tiempo: 0.161s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 62.36%  (tiempo: 0.46s)
+  w=2 → 73.49%  (tiempo: 2.10s)
+    ★ NUEVA MEJOR
+  w=3 → 70.46%  (tiempo: 4.07s)
+  w=5 → 79.54%  (tiempo: 8.30s)
+    ★ NUEVA MEJOR
+  w=8 → 45.27%  (tiempo: 16.60s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            68.08%
+Beam Search:       79.54%
+Teórico máximo:    99.67%
+
+Mejoría Beam Search sobre Greedy: 16.84%
+
+BR4 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 10
+Volumen teórico utilizable: 97.6%
+
+Bloques generados: 20000 (tiempo: 0.076s)
+
+=== GREEDY ===
+Cajas colocadas: 80
+Utilización: 64.36%
+Volumen: 19365840 / 30089620
+Tiempo: 0.188s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 68.32%  (tiempo: 0.86s)
+    ★ NUEVA MEJOR
+  w=2 → 73.54%  (tiempo: 2.77s)
+    ★ NUEVA MEJOR
+  w=3 → 62.04%  (tiempo: 5.52s)
+  w=5 → 70.55%  (tiempo: 14.22s)
+  w=8 → 1.89%  (tiempo: 7.81s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            64.36%
+Beam Search:       73.54%
+Teórico máximo:    97.60%
+
+Mejoría Beam Search sobre Greedy: 14.27%
+
+BR5 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 12
+Volumen teórico utilizable: 98.7%
+
+Bloques generados: 20000 (tiempo: 0.090s)
+
+=== GREEDY ===
+Cajas colocadas: 69
+Utilización: 53.87%
+Volumen: 16208672 / 30089620
+Tiempo: 0.248s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 46.02%  (tiempo: 0.87s)
+  w=2 → 58.47%  (tiempo: 6.98s)
+    ★ NUEVA MEJOR
+  w=3 → 69.48%  (tiempo: 11.00s)
+    ★ NUEVA MEJOR
+  w=5 → 36.99%  (tiempo: 12.55s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            53.87%
+Beam Search:       69.48%
+Teórico máximo:    98.69%
+
+Mejoría Beam Search sobre Greedy: 28.98%
+
+BR6 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 15
+Volumen teórico utilizable: 99.7%
+
+Bloques generados: 20000 (tiempo: 0.096s)
+
+=== GREEDY ===
+Cajas colocadas: 81
+Utilización: 52.53%
+Volumen: 15807019 / 30089620
+Tiempo: 0.412s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 66.26%  (tiempo: 2.03s)
+    ★ NUEVA MEJOR
+  w=2 → 59.27%  (tiempo: 9.00s)
+  w=3 → 69.81%  (tiempo: 17.86s)
+    ★ NUEVA MEJOR
+  w=5 → 2.88%  (tiempo: 2.26s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            52.53%
+Beam Search:       69.81%
+Teórico máximo:    99.73%
+
+Mejoría Beam Search sobre Greedy: 32.88%
+
+BR7 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 20
+Volumen teórico utilizable: 97.9%
+
+Bloques generados: 20000 (tiempo: 0.138s)
+
+=== GREEDY ===
+Cajas colocadas: 64
+Utilización: 45.54%
+Volumen: 13701532 / 30089620
+Tiempo: 0.677s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 42.89%  (tiempo: 3.98s)
+  w=2 → 69.97%  (tiempo: 22.61s)
+    ★ NUEVA MEJOR
+  w=3 → 4.02%  (tiempo: 4.81s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            45.54%
+Beam Search:       69.97%
+Teórico máximo:    97.88%
+
+Mejoría Beam Search sobre Greedy: 53.66%
+
+BR8 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 30
+Volumen teórico utilizable: 100.0%
+
+Bloques generados: 20000 (tiempo: 0.140s)
+
+=== GREEDY ===
+Cajas colocadas: 92
+Utilización: 57.48%
+Volumen: 17294740 / 30089620
+Tiempo: 1.055s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 45.43%  (tiempo: 10.43s)
+  w=2 → 9.14%  (tiempo: 20.61s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            57.48%
+Beam Search:       57.48%
+Teórico máximo:    99.99%
+
+Mejoría Beam Search sobre Greedy: 0.00%
+
+BR9 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 40
+Volumen teórico utilizable: 100.0%
+
+Bloques generados: 20000 (tiempo: 0.185s)
+
+=== GREEDY ===
+Cajas colocadas: 104
+Utilización: 49.47%
+Volumen: 14883942 / 30089620
+Tiempo: 1.967s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 51.20%  (tiempo: 14.96s)
+    ★ NUEVA MEJOR
+  w=2 → 3.02%  (tiempo: 17.87s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            49.47%
+Beam Search:       51.20%
+Teórico máximo:    100.00%
+
+Mejoría Beam Search sobre Greedy: 3.51%
+
+BR10 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 50
+Volumen teórico utilizable: 99.4%
+
+Bloques generados: 20000 (tiempo: 0.269s)
+
+=== GREEDY ===
+Cajas colocadas: 86
+Utilización: 48.90%
+Volumen: 14713614 / 30089620
+Tiempo: 2.784s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 50.62%  (tiempo: 28.02s)
+    ★ NUEVA MEJOR
+  w=2 → 0.00%  (tiempo: 3.20s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            48.90%
+Beam Search:       50.62%
+Teórico máximo:    99.43%
+
+Mejoría Beam Search sobre Greedy: 3.51%
+
+BR11 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 60
+Volumen teórico utilizable: 99.8%
+
+Bloques generados: 20000 (tiempo: 0.615s)
+
+=== GREEDY ===
+Cajas colocadas: 71
+Utilización: 44.41%
+Volumen: 13362913 / 30089620
+Tiempo: 4.063s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 7.70%  (tiempo: 33.22s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            44.41%
+Beam Search:       44.41%
+Teórico máximo:    99.77%
+
+Mejoría Beam Search sobre Greedy: 0.00%
+
+BR12 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 70
+Volumen teórico utilizable: 99.1%
+
+Bloques generados: 20000 (tiempo: 0.834s)
+
+=== GREEDY ===
+Cajas colocadas: 85
+Utilización: 52.99%
+Volumen: 15943991 / 30089620
+Tiempo: 5.437s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 11.30%  (tiempo: 31.60s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            52.99%
+Beam Search:       52.99%
+Teórico máximo:    99.14%
+
+Mejoría Beam Search sobre Greedy: 0.00%
+
+BR13 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 80
+Volumen teórico utilizable: 99.4%
+
+Bloques generados: 20000 (tiempo: 1.347s)
+
+=== GREEDY ===
+Cajas colocadas: 64
+Utilización: 48.28%
+Volumen: 14526374 / 30089620
+Tiempo: 5.977s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 12.32%  (tiempo: 34.30s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            48.28%
+Beam Search:       48.28%
+Teórico máximo:    99.44%
+
+Mejoría Beam Search sobre Greedy: 0.00%
+
+BR14 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 90
+Volumen teórico utilizable: 99.3%
+
+Bloques generados: 20000 (tiempo: 10.579s)
+
+=== GREEDY ===
+Cajas colocadas: 67
+Utilización: 47.11%
+Volumen: 14174072 / 30089620
+Tiempo: 9.522s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 1.26%  (tiempo: 33.73s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            47.11%
+Beam Search:       47.11%
+Teórico máximo:    99.26%
+
+Mejoría Beam Search sobre Greedy: 0.00%
+
+BR15 instancia 0:
+
+=== INSTANCIA ===
+Contenedor: 587 x 233 x 220
+Tipos de caja: 100
+Volumen teórico utilizable: 99.9%
+
+Bloques generados: 20000 (tiempo: 17.272s)
+
+=== GREEDY ===
+Cajas colocadas: 69
+Utilización: 53.49%
+Volumen: 16095847 / 30089620
+Tiempo: 13.781s
+
+=== BEAM SEARCH (Double Effort) ===
+  w=1 → 8.74%  (tiempo: 32.07s)
+
+=== BÚSQUEDA LOCAL POST-BEAM ===
+
+=== COMPARACIÓN FINAL ===
+Greedy:            53.49%
+Beam Search:       53.49%
+Teórico máximo:    99.93%
+
+Mejoría Beam Search sobre Greedy: 0.00%
+

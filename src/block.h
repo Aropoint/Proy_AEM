@@ -1,9 +1,21 @@
 #pragma once
 #include "box.h"
 #include "container.h"
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
+
+struct KnapsackCache {
+    // key = (remainingBoxesSignature, capacity)
+    // value = vector<int> best[0..capacity]
+    unordered_map<size_t, vector<int>> cacheLength;
+    unordered_map<size_t, vector<int>> cacheWidth;
+    unordered_map<size_t, vector<int>> cacheHeight;
+};
+
+// Función auxiliar para obtener una firma hash de las cajas restantes
+size_t boxesSignature(const vector<Box>& boxes);
 
 // Un bloque es un conjunto de cajas colocadas compactamente
 // dentro de su cuboide envolvente mínimo (K2 del paper)
@@ -47,4 +59,4 @@ vector<Block> generateBlocks(const vector<Box>& boxes,
 // Función f(b,r) del paper (K4): evalúa qué tan bueno es colocar
 // bloque b en espacio libre r. Considera volumen usado y pérdida estimada.
 double evaluateBlock(const Block& b, const Cuboid& r,
-                     const vector<Box>& remaining);
+                     const vector<Box>& remaining, KnapsackCache& cache);

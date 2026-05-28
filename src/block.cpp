@@ -3,11 +3,38 @@
 #include <set>
 #include <tuple>
 #include <numeric>
+#include <functional>
+#include <unordered_map>
 
 using namespace std;
 // ---------------------------------------------------------------------------
 // Block
 // ---------------------------------------------------------------------------
+
+// Función para calcular hash de cajas restantes
+size_t boxesSignature(const vector<Box>& boxes) {
+    size_t seed = 0;
+    for (const auto& b : boxes) {
+        // combinar id y quantity
+        seed ^= hash<int>{}(b.id) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+        seed ^= hash<int>{}(b.quantity) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+    }
+    return seed;
+}
+
+// Resuelve unbounded knapsack para un eje con dimensiones dadas
+static vector<int> unboundedKnapsack(int capacity, const vector<int>& dims) {
+    vector<int> best(capacity+1, 0);
+    for (int c = 1; c <= capacity; ++c) {
+        for (int d : dims) {
+            if (d <= c) {
+                int val = best[c-d] + d;
+                if (val > best[c]) best[c] = val;
+            }
+        }
+    }
+    return best;
+}
 
 vector<PlacedBox> Block::toAbsolute(int ox, int oy, int oz) const {
     vector<PlacedBox> result;
@@ -33,14 +60,13 @@ vector<Block> generateSimpleBlocks(const vector<Box>& boxes,
 
         for (auto& [bl, bw, bh] : orientations) {
             // Cuántas caben en cada eje sin exceder el contenedor ni la cantidad
-            int maxX = min(L / bl, box.quantity);
-            int maxY = min(W / bw, box.quantity);
-            int maxZ = min(H / bh, box.quantity);
-
-            // Limitar para no generar demasiados bloques
-            maxX = min(maxX, 10);
-            maxY = min(maxY, 10);
-            maxZ = min(maxZ, 10);
+            int maxX = L / bl;
+            int maxY = W / bw;
+            int maxZ = H / bh;
+            // Asegurar no exceder cantidad disponible
+            maxX = std::min(maxX, box.quantity);
+            maxY = std::min(maxY, box.quantity);
+            maxZ = std::min(maxZ, box.quantity);
 
             for (int nx = 1; nx <= maxX; nx++) {
                 for (int ny = 1; ny <= maxY; ny++) {
@@ -204,53 +230,64 @@ vector<Block> generateBlocks(const vector<Box>& boxes,
 // tras colocar b, usando combinaciones lineales de dimensiones de cajas.
 // ---------------------------------------------------------------------------
 
+// EvaluateBlock con knapsack DP (usando cache)
 double evaluateBlock(const Block& b, const Cuboid& r,
-                     const vector<Box>& remaining) {
-    if (!b.fitsIn(r)) return -1.0;
+                     const vector<Box>& remaining,
+                     KnapsackCache& cache) {
+    if (!b.fitsIn(r)) return -1e9;
 
-    // Recopilar dimensiones disponibles en cada eje (de las cajas restantes)
+    // Dimensiones restantes después de colocar b
+    int capX = r.l - b.l;
+    int capY = r.w - b.w;
+    int capZ = r.h - b.h;
+    if (capX < 0 || capY < 0 || capZ < 0) return -1e9;
+
+    // Recoger dimensiones de cajas restantes (todas las orientaciones válidas)
     vector<int> lengths, widths, heights;
     for (const auto& box : remaining) {
         if (box.quantity <= 0) continue;
         auto orients = getOrientations(box);
-        for (auto& [ol, ow, oh] : orients) {
-            lengths.push_back(ol);
-            widths.push_back(ow);
-            heights.push_back(oh);
+        for (auto& [l,w,h] : orients) {
+            lengths.push_back(l);
+            widths.push_back(w);
+            heights.push_back(h);
         }
     }
+    // Eliminar duplicados para eficiencia (opcional)
+    sort(lengths.begin(), lengths.end());
+    lengths.erase(unique(lengths.begin(), lengths.end()), lengths.end());
+    sort(widths.begin(), widths.end());
+    widths.erase(unique(widths.begin(), widths.end()), widths.end());
+    sort(heights.begin(), heights.end());
+    heights.erase(unique(heights.begin(), heights.end()), heights.end());
 
-    // Para cada eje, encontrar la máxima combinación lineal de dimensiones
-    // que quepa en el espacio residual (r.dim - b.dim)
-    // Modelado como knapsack 0/1 simplificado (versión greedy para eficiencia)
-    auto maxLinearCombination = [](int capacity, vector<int>& dims) -> int {
-        if (capacity <= 0 || dims.empty()) return 0;
-        // Ordenar dimensiones de mayor a menor y llenar con repetición
-        sort(dims.begin(), dims.end(), greater<int>());
-        dims.erase(unique(dims.begin(), dims.end()), dims.end());
+    // Firmar las cajas restantes para cache
+    size_t sig = boxesSignature(remaining);
 
-        int best = 0, rem = capacity;
-        for (int d : dims) {
-            if (d <= rem) {
-                int n = rem / d;
-                best += n * d;
-                rem -= n * d;
-            }
-            if (rem == 0) break;
+    // Obtener o calcular tablas DP
+    auto getKnap = [&](unordered_map<size_t, vector<int>>& cacheMap,
+                       int cap, const vector<int>& dims) -> const vector<int>& {
+        auto it = cacheMap.find(sig);
+        if (it == cacheMap.end()) {
+            // Calcular para todas las capacidades hasta cap (máximo necesario)
+            // En realidad solo necesitamos hasta cap, pero podríamos guardar para cada capacidad.
+            // Para simplificar, calculamos hasta cap y guardamos.
+            auto newEntry = unboundedKnapsack(cap, dims);
+            cacheMap[sig] = move(newEntry);
+            it = cacheMap.find(sig);
         }
-        return best;
+        return it->second;
     };
 
-    int capX = r.l - b.l;
-    int capY = r.w - b.w;
-    int capZ = r.h - b.h;
+    const auto& bestL = getKnap(cache.cacheLength, capX, lengths);
+    const auto& bestW = getKnap(cache.cacheWidth, capY, widths);
+    const auto& bestH = getKnap(cache.cacheHeight, capZ, heights);
 
-    int lmax = maxLinearCombination(capX, lengths);
-    int wmax = maxLinearCombination(capY, widths);
-    int hmax = maxLinearCombination(capZ, heights);
+    int lmax = bestL[capX];
+    int wmax = bestW[capY];
+    int hmax = bestH[capZ];
 
     double usableVol = (double)(b.l + lmax) * (b.w + wmax) * (b.h + hmax);
     double vloss = (double)r.volume() - usableVol;
-
     return (double)b.usedVolume - vloss;
 }

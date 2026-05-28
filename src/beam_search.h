@@ -7,12 +7,21 @@
 
 using namespace std;
 
-struct State;
+struct State {
+    Container container;
+    vector<Box> remainingBoxes;
+    double volumeUsed;
+    int blocksPlaced;
+    double greedyScore;
+    vector<int> greedySignature;
+    mutable KnapsackCache knapCache;
 
-// Ancho adaptivo del beam según diversidad de estados
-int adaptiveBeamWidth(vector<State>& states, int wMin, int wMax);
+    bool operator<(const State& other) const;
+};
 
-// Algoritmo Beam Search del paper Araya & Riff 2014
+int adaptiveBeamWidth(const vector<State>& states, int wMin, int wMax);
+void removeSimilarStates(vector<State>& states);
+double evaluateState(State& s, const vector<Box>& allBoxes, vector<Block>& blocks);
 Solution beamSearch(Container& initialContainer,
                     vector<Box>& boxes,
                     vector<Block>& blocks,

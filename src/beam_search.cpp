@@ -1,59 +1,65 @@
 #include "box.h"
 #include "container.h"
+#include "beam_search.h"
 #include "block.h"
 #include "greedy.h"
 #include <vector>
-#include <queue>
 #include <algorithm>
 #include <ctime>
 #include <cmath>
 using namespace std;
 
-struct State {
-    Container container;
-    vector<Box> remainingBoxes;
-    double volumeUsed;
-    int blocksPlaced;
-    
-    // Compara estados por volumen utilizado (orden descendente para priority_queue)
-    bool operator<(const State& other) const {
-        return volumeUsed < other.volumeUsed; // min-heap -> invertimos para max-heap
-    }
-};
+// Implementación del operador < (puede estar aquí o inline en el .h)
+bool State::operator<(const State& other) const {
+    return greedyScore < other.greedyScore;
+}
 
-// ============================================================================
-// BEAM SEARCH - Paper: Araya & Riff 2014
-// ============================================================================
-// Algoritmo:
-// 1. Inicializa un conjunto de K estados (inicialmente solo el estado vacío)
-// 2. Para cada iteración:
-//    a) Para cada estado en el beam, expande los mejores bloques disponibles
-//    b) Selecciona los K mejores nuevos estados
-// 3. Retorna el estado con máximo volumen utilizado
-// ============================================================================
-
-// Ancho adaptivo: puede aumentar el beam width si hay mucha diversidad
-int adaptiveBeamWidth(vector<State>& states, int wMin, int wMax) {
-    if ((int)states.size() < wMin) return wMin;
-    
-    // Calcular varianza de volumeUsed para medir diversidad
+int adaptiveBeamWidth(const vector<State>& states, int wMin, int wMax) {
+    if ((int)states.size() <= wMin) return wMin;
     double mean = 0;
-    for (const auto& s : states)
-        mean += s.volumeUsed;
+    for (const auto& s : states) mean += s.greedyScore;
     mean /= states.size();
-    
-    double variance = 0;
-    for (const auto& s : states)
-        variance += (s.volumeUsed - mean) * (s.volumeUsed - mean);
-    variance /= states.size();
-    
-    double stdDev = sqrt(variance);
-    
-    // Mayor varianza = más diversidad = aumentar ancho
-    // Si stdDev > 5% del promedio, aumentar ancho
-    if (stdDev > 0.05 * mean)
-        return min(wMax, wMin * 2);
+    double var = 0;
+    for (const auto& s : states) var += (s.greedyScore - mean) * (s.greedyScore - mean);
+    var /= states.size();
+    double cv = (mean > 0) ? sqrt(var) / mean : 0;
+    if (cv > 0.02) return min(wMax, (int)(wMin * 1.5));
     return wMin;
+}
+
+void removeSimilarStates(vector<State>& states) {
+    vector<bool> keep(states.size(), true);
+    for (size_t i = 0; i < states.size(); ++i) {
+        if (!keep[i]) continue;
+        for (size_t j = i+1; j < states.size(); ++j) {
+            if (!keep[j]) continue;
+            if (states[i].greedySignature == states[j].greedySignature) {
+                if (states[i].volumeUsed <= states[j].volumeUsed)
+                    keep[j] = false;
+                else
+                    keep[i] = false;
+            }
+        }
+    }
+    vector<State> filtered;
+    for (size_t i = 0; i < states.size(); ++i)
+        if (keep[i]) filtered.push_back(move(states[i]));
+    states = move(filtered);
+}
+
+double evaluateState(State& s, const vector<Box>& allBoxes, vector<Block>& blocks) {
+    Container tempContainer = s.container;
+    vector<Box> tempBoxes = s.remainingBoxes;
+    Solution tempSol = greedySolve(tempContainer, tempBoxes, blocks, s.knapCache);
+    double volume = s.volumeUsed + tempSol.volumeUtilization();
+
+    vector<int> sig(allBoxes.size() + 1, 0);
+    for (const auto& pb : tempSol.placedBoxes) {
+        if (pb.boxId >= 1 && pb.boxId < (int)sig.size())
+            sig[pb.boxId]++;
+    }
+    s.greedySignature = sig;
+    return volume;
 }
 
 Solution beamSearch(Container& initialContainer,
@@ -61,146 +67,110 @@ Solution beamSearch(Container& initialContainer,
                     vector<Block>& blocks,
                     int beamWidth,
                     int timeLimitSeconds) {
-    
     auto startTime = time(nullptr);
-    
-    // Estado inicial: contenedor vacío
-    State initialState{initialContainer, boxes, 0.0, 0};
-    
-    // Cola de prioridad: mantiene los K mejores estados
-    priority_queue<State> currentLevel;
-    currentLevel.push(initialState);
-    
+
+    State initialState{initialContainer, boxes, 0.0, 0, 0.0, {}, KnapsackCache()};
+    initialState.greedyScore = evaluateState(initialState, boxes, blocks);
+
+    vector<State> currentBeam = {initialState};
     State bestState = initialState;
     int iteration = 0;
-    const int maxIterations = 100;
-    
-    while (!currentLevel.empty() && iteration < maxIterations) {
-        iteration++;
-        
-        // Extraer los estados actuales del nivel
-        vector<State> statesThisLevel;
-        while (!currentLevel.empty()) {
-            statesThisLevel.push_back(currentLevel.top());
-            currentLevel.pop();
-        }
-        
-        // Generar nuevos estados expandiendo cada uno
-        priority_queue<State> nextLevel;
-        
-        for (const auto& parentState : statesThisLevel) {
-            // Seleccionar espacio libre
+
+    while (iteration < 300) {
+        if (difftime(time(nullptr), startTime) > timeLimitSeconds) break;
+        if (currentBeam.empty()) break;
+
+        vector<State> allSuccessors;
+        bool isRoot = (iteration == 0 && currentBeam.size() == 1);
+
+        for (const auto& parentState : currentBeam) {
             Container tempContainer = parentState.container;
             int spaceIdx = tempContainer.selectFreeSpace();
             if (spaceIdx == -1) {
-                // No hay más espacio, este estado es terminal
                 if (parentState.volumeUsed > bestState.volumeUsed)
                     bestState = parentState;
-                nextLevel.push(parentState);
                 continue;
             }
-            
+
             Cuboid selectedSpace = tempContainer.freeSpaces[spaceIdx];
-            
-            // Encontrar los K mejores bloques que caben
-            vector<pair<double, int>> blockScores; // (score, index)
-            
-            for (size_t i = 0; i < blocks.size(); i++) {
+
+            vector<pair<double, int>> blockScores;
+            for (size_t i = 0; i < blocks.size(); ++i) {
                 const Block& blk = blocks[i];
-                
-                if (!blk.fitsIn(selectedSpace))
-                    continue;
-                
-                // Verificar disponibilidad de cajas
-                vector<int> usage(boxes.size() + 1, 0);
+                if (!blk.fitsIn(selectedSpace)) continue;
+
+                vector<int> usage(boxes.size()+1, 0);
                 bool feasible = true;
-                for (const auto& pb : blk.boxes) {
-                    usage[pb.boxId]++;
+                for (const auto& pb : blk.boxes) usage[pb.boxId]++;
+                for (const auto& rb : parentState.remainingBoxes) {
+                    if (usage[rb.id] > rb.quantity) { feasible = false; break; }
                 }
-                
-                for (size_t j = 0; j < parentState.remainingBoxes.size(); j++) {
-                    if (usage[parentState.remainingBoxes[j].id] > parentState.remainingBoxes[j].quantity) {
-                        feasible = false;
-                        break;
-                    }
-                }
-                if (!feasible)
-                    continue;
-                
-                double score = evaluateBlock(blk, selectedSpace, parentState.remainingBoxes);
+                if (!feasible) continue;
+
+                double score = evaluateBlock(blk, selectedSpace, parentState.remainingBoxes,
+                                             parentState.knapCache);
                 blockScores.push_back({score, (int)i});
             }
-            
-            // Ordenar bloques por score (descendente)
-            sort(blockScores.begin(), blockScores.end(), 
-                 [](const auto& a, const auto& b) { return a.first > b.first; });
-            
-            // Expandir los Top-K bloques
-            int expansionWidth = min(beamWidth, (int)blockScores.size());
-            if (expansionWidth == 0) {
-                // No hay bloques válidos
+
+            if (blockScores.empty()) {
                 if (parentState.volumeUsed > bestState.volumeUsed)
                     bestState = parentState;
-                nextLevel.push(parentState);
                 continue;
             }
-            
-            for (int e = 0; e < expansionWidth; e++) {
-                int blockIdx = blockScores[e].second;
-                const Block& blk = blocks[blockIdx];
-                
-                // Crear nuevo estado
+
+            sort(blockScores.begin(), blockScores.end(),
+                 [](const auto& a, const auto& b) { return a.first > b.first; });
+
+            int expandCount = isRoot ? min(beamWidth*beamWidth, (int)blockScores.size())
+                                     : min(beamWidth, (int)blockScores.size());
+
+            for (int e = 0; e < expandCount; ++e) {
+                if (difftime(time(nullptr), startTime) > timeLimitSeconds) break;
+
+                const Block& blk = blocks[blockScores[e].second];
                 State newState = parentState;
-                
-                // Colocar bloque
-                auto absoluteBoxes = blk.toAbsolute(selectedSpace.x, selectedSpace.y, selectedSpace.z);
-                newState.container.placeBlock(selectedSpace, blk.l, blk.w, blk.h, absoluteBoxes);
+
+                auto absBoxes = blk.toAbsolute(selectedSpace.x, selectedSpace.y, selectedSpace.z);
+                newState.container.placeBlock(selectedSpace, blk.l, blk.w, blk.h, absBoxes);
                 newState.volumeUsed += (double)blk.usedVolume;
                 newState.blocksPlaced++;
-                
-                // Actualizar cajas restantes
+
                 for (const auto& pb : blk.boxes) {
-                    for (size_t j = 0; j < newState.remainingBoxes.size(); j++) {
-                        if (newState.remainingBoxes[j].id == pb.boxId) {
-                            newState.remainingBoxes[j].quantity--;
+                    for (auto& rb : newState.remainingBoxes) {
+                        if (rb.id == pb.boxId) {
+                            rb.quantity--;
                             break;
                         }
                     }
                 }
-                
-                // Registrar si es mejor
+
+                newState.greedyScore = evaluateState(newState, boxes, blocks);
                 if (newState.volumeUsed > bestState.volumeUsed)
                     bestState = newState;
-                
-                nextLevel.push(newState);
+
+                allSuccessors.push_back(move(newState));
             }
         }
-        
-        // Seleccionar los K mejores estados para la siguiente iteración
-        vector<State> allNext;
-        while (!nextLevel.empty()) {
-            allNext.push_back(nextLevel.top());
-            nextLevel.pop();
-        }
-        
-        int keepWidth = adaptiveBeamWidth(allNext, beamWidth, beamWidth * 2);
-        keepWidth = min(keepWidth, (int)allNext.size());
-        
-        for (int i = 0; i < keepWidth; i++) {
-            currentLevel.push(allNext[i]);
-        }
-        
-        // Verificar límite de tiempo
-        time_t currentTime = time(nullptr);
-        if (difftime(currentTime, startTime) > timeLimitSeconds)
-            break;
+
+        if (allSuccessors.empty()) break;
+
+        removeSimilarStates(allSuccessors);
+
+        sort(allSuccessors.begin(), allSuccessors.end(),
+             [](const auto& a, const auto& b) { return a.greedyScore > b.greedyScore; });
+
+        int adaptiveW = adaptiveBeamWidth(allSuccessors, beamWidth, beamWidth*2);
+        int keep = min(adaptiveW, (int)allSuccessors.size());
+
+        currentBeam.clear();
+        for (int i = 0; i < keep; ++i)
+            currentBeam.push_back(move(allSuccessors[i]));
+
+        ++iteration;
     }
-    
-    // Construir solución final
+
     Solution solution;
-    for (const auto& pb : bestState.container.placed) {
+    for (const auto& pb : bestState.container.placed)
         solution.placedBoxes.push_back(pb);
-    }
-    
     return solution;
 }
