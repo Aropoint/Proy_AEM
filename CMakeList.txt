@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.10)
+project(clp_solver)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "-O2 -Wall -Wextra")
+
+file(GLOB SOURCES "src/*.cpp")
+add_executable(clp_solver ${SOURCES})
