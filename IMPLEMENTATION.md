@@ -3,7 +3,7 @@
 Implementación del algoritmo **Beam Search** para el **Container Loading Problem** basado en el paper:
 **"A beam search approach to the container loading problem"** - Araya & Riff (2014)
 
-## 📊 Algoritmos Implementados
+## Algoritmos Implementados
 
 ### 1. **Greedy Algorithm**
 - Selecciona el espacio libre con menor distancia Manhattan (K3)
@@ -17,7 +17,7 @@ Implementación del algoritmo **Beam Search** para el **Container Loading Proble
 - Ancho de beam adaptivo según diversidad de estados
 - **Mejor calidad** pero más lento (~1-100x más tiempo)
 
-## 🔧 Estructura del Código
+## Estructura del Código
 
 ```
 src/
@@ -30,7 +30,7 @@ src/
 └── main.cpp            # Función principal
 ```
 
-## 📈 Resultados Experimentales
+## Resultados Experimentales
 
 ### Instancias Homogéneas (BR0-BR5)
 - Greedy: **81% promedio**
@@ -39,7 +39,7 @@ src/
 
 ### Instancias Heterogéneas (BR6-BR15)  
 - **BR6**: Greedy 75.84% → Beam Search **81.73%** (+7.63%)
-- **BR7**: Greedy 58.32% → Beam Search **82.72%** (+41.84%) ⭐
+- **BR7**: Greedy 58.32% → Beam Search **82.72%** (+41.84%) x Mejora considerable
 - **BR8**: Greedy 76.90% → Beam Search **78.09%** (+1.54%)
 
 ### Recomendaciones
@@ -50,7 +50,7 @@ src/
 | BR6-BR7 | **Beam Search** | Gran mejora (+7-42%) |
 | BR8-BR15 | **Greedy o Beam(w=3)** | Equilibrio calidad/tiempo |
 
-## 🚀 Compilación y Ejecución
+## Compilación y Ejecución
 
 ```bash
 # Compilar
@@ -61,7 +61,7 @@ g++ -std=c++17 -O2 -Wall src/*.cpp -o solver_new.exe
 ./solver_new.exe ./data/BR8.txt 0
 ```
 
-## 💡 Mejoras Futuras
+## Mejoras Futuras
 
 1. **Generación dinámica de bloques** durante la búsqueda
    - Actualizar bloques disponibles según espacios residuales
@@ -75,7 +75,7 @@ g++ -std=c++17 -O2 -Wall src/*.cpp -o solver_new.exe
 4. **Paralelización** en la expansión de estados
    - Multi-threading para acelerar búsqueda
 
-## 📝 Referencias
+## Referencias
 
 - **Paper**: Araya, G., & Riff, M. C. (2014). "A beam search approach to the container loading problem". 
 - **Dataset**: OR-Library instances BR0-BR15
@@ -83,5 +83,5 @@ g++ -std=c++17 -O2 -Wall src/*.cpp -o solver_new.exe
 
 ---
 
-**Estado**: ✅ Implementación completa y funcional  
+**Estado**: Implementación completa y funcional  
 **Fecha**: Mayo 2026
