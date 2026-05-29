@@ -51,7 +51,7 @@ vector<Block> generateSimpleBlocks(const vector<Box>& boxes,
             int maxY = W / bw;
             int maxZ = H / bh;
             // Asegurar no exceder cantidad disponible
-            const int MAX_PER_DIM = 12;  // ajustable según experimentación (para no generar bloques gigantes)
+            const int MAX_PER_DIM = 20;  // aumentado para generar más combinaciones simples
             maxX = min(maxX, MAX_PER_DIM);
             maxY = min(maxY, MAX_PER_DIM);
             maxZ = min(maxZ, MAX_PER_DIM);

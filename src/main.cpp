@@ -101,15 +101,15 @@ int maxBeamWidth;         // ancho máximo del haz
 int totalTimeLimit;       // segundos por instancia
 
 if (stronglyHeterogeneous) {
-    maxBlocks = 8000;          // menos bloques para acelerar
-    minFillRate = 0.98;        // bloques más densos (casi llenos)
-    totalTimeLimit = 120;      // más tiempo (ajústalo según tu hardware)
-    maxBeamWidth = 15;         // ancho de haz pequeño
+    maxBlocks = 15000;         // más bloques para mejor exploración
+    minFillRate = 0.88;        // bloques más flexibles
+    totalTimeLimit = 180;      // más tiempo para búsqueda profunda
+    maxBeamWidth = 25;         // ancho de haz aumentado
 }else{
-    maxBlocks = 20000;         // más bloques para aprovechar la homogeneidad
-    minFillRate = 1.0;        // solo bloques simples (100% llenos)
-    totalTimeLimit = 30;      // tiempo moderado
-    maxBeamWidth = 20;        // FIX: w>20 con 20000 bloques agota el tiempo sin completar una iteracion
+    maxBlocks = 35000;         // muchos bloques para exploración exhaustiva
+    minFillRate = 0.92;        // flexible: permite bloques 92% llenos
+    totalTimeLimit = 60;       // tiempo extendido
+    maxBeamWidth = 30;         // exploración más amplia
 }
 
 // Opcional: permitir pasar el tiempo por línea de comandos
@@ -185,8 +185,8 @@ cout << "\nBloques generados: " << blocks.size()
                 cout << "    ★ NUEVA MEJOR" << endl;
             }
             
-            // Duplicar esfuerzo según el paper: w = ceil(sqrt(2) * w)
-            w = max(2, (int)ceil(sqrt(2.0) * w));
+            // Incremento más gradual para más iteraciones: w = 1.5*w
+            w = max(2, (int)ceil(1.5 * w));
             if (w > maxBeamWidth * 2) break;
             iteration++;
             if (iteration > 20) break; // seguridad

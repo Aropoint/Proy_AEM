@@ -137,8 +137,8 @@ Solution beamSearch(Container& initialContainer,
             sort(blockScores.begin(), blockScores.end(),
                  [](const auto& a, const auto& b) { return a.first > b.first; });
 
-            int expandCount = isRoot ? min(beamWidth*beamWidth, (int)blockScores.size())
-                                     : min(beamWidth, (int)blockScores.size());
+            int expandCount = isRoot ? min(beamWidth*beamWidth*2, (int)blockScores.size())
+                                     : min(beamWidth*2, (int)blockScores.size());
 
             for (int e = 0; e < expandCount; ++e) {
                 if (difftime(time(nullptr), startTime) > timeLimitSeconds) break;

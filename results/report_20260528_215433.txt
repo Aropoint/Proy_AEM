@@ -1,0 +1,119 @@
+========================================
+INFORME DE EJECUCIÓN - jue 28 may 2026 21:54:34 -04
+========================================
+
+=============== BR0 ===============
+Greedy:                    85.93%
+Beam Search:               85.93%
+Mejoría:                   0.00%
+
+=============== BR1 ===============
+Greedy:                    78.37%
+Beam Search:               89.29%
+Mejoría:                   13.94%
+
+=============== BR2 ===============
+Greedy:                    90.08%
+Beam Search:               90.08%
+Mejoría:                   0.00%
+
+=============== BR3 ===============
+Greedy:                    83.14%
+Beam Search:               87.04%
+Mejoría:                   4.69%
+
+=============== BR4 ===============
+Greedy:                    81.69%
+Beam Search:               88.77%
+Mejoría:                   8.67%
+
+=============== BR5 ===============
+Greedy:                    77.11%
+Beam Search:               83.30%
+Mejoría:                   8.02%
+
+=============== BR6 ===============
+Greedy:                    73.22%
+Beam Search:               86.64%
+Mejoría:                   18.33%
+
+=============== BR7 ===============
+Greedy:                    75.48%
+Beam Search:               81.19%
+Mejoría:                   7.56%
+
+=============== BR8 ===============
+Greedy:                    68.10%
+Beam Search:               81.01%
+Mejoría:                   18.97%
+
+=============== BR9 ===============
+Greedy:                    73.92%
+Beam Search:               77.87%
+Mejoría:                   5.35%
+
+=============== BR10 ===============
+Greedy:                    71.81%
+Beam Search:               80.81%
+Mejoría:                   12.54%
+
+=============== BR11 ===============
+Greedy:                    54.17%
+Beam Search:               77.46%
+Mejoría:                   43.00%
+
+=============== BR12 ===============
+Greedy:                    65.59%
+Beam Search:               65.59%
+Mejoría:                   0.00%
+
+=============== BR13 ===============
+Greedy:                    52.30%
+Beam Search:               61.48%
+Mejoría:                   17.56%
+
+=============== BR14 ===============
+Greedy:                    61.04%
+Beam Search:               72.80%
+Mejoría:                   19.27%
+
+=============== BR15 ===============
+Greedy:                    50.90%
+Beam Search:               53.23%
+Mejoría:                   4.58%
+
+
+========================================
+RESUMEN EJECUTIVO
+========================================
+
+Total de instancias ejecutadas: 16
+
+--- RESULTADOS POR INSTANCIA ---
+
+Instancia    Greedy %        Beam %          Mejora %       
+----------   --------        -------         ---------      
+BR0.txt      85.93%          85.93%          4.58%          
+BR1.txt      78.37%          89.29%          0.00%          
+BR2.txt      90.08%          90.08%          13.94%         
+BR3.txt      83.14%          87.04%          0.00%          
+BR4.txt      81.69%          88.77%          4.69%          
+BR5.txt      77.11%          83.30%          8.67%          
+BR6.txt      73.22%          86.64%          8.02%          
+BR7.txt      75.48%          81.19%          18.33%         
+BR8.txt      68.10%          81.01%          7.56%          
+BR9.txt      73.92%          77.87%          18.97%         
+BR10.txt     71.81%          80.81%          5.35%          
+BR11.txt     54.17%          77.46%          12.54%         
+BR12.txt     65.59%          65.59%          43.00%         
+BR13.txt     52.30%          61.48%          0.00%          
+BR14.txt     61.04%          72.80%          17.56%         
+BR15.txt     50.90%          53.23%          19.27%         
+
+--- PROMEDIOS GENERALES ---
+Promedio Greedy:           71.43%
+Promedio Beam Search:      78.91%
+Promedio Mejora:           11.00%
+
+Reporte guardado en: /home/aropunto/Escritorio/Proy_AEM/results/report_20260528_215433.txt
+Fecha de finalización: jue 28 may 2026 22:14:15 -04
