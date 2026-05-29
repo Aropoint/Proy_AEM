@@ -22,19 +22,6 @@ size_t boxesSignature(const vector<Box>& boxes) {
     return seed;
 }
 
-// Resuelve unbounded knapsack para un eje con dimensiones dadas
-static vector<int> unboundedKnapsack(int capacity, const vector<int>& dims) {
-    vector<int> best(capacity+1, 0);
-    for (int c = 1; c <= capacity; ++c) {
-        for (int d : dims) {
-            if (d <= c) {
-                int val = best[c-d] + d;
-                if (val > best[c]) best[c] = val;
-            }
-        }
-    }
-    return best;
-}
 
 vector<PlacedBox> Block::toAbsolute(int ox, int oy, int oz) const {
     vector<PlacedBox> result;
@@ -64,9 +51,10 @@ vector<Block> generateSimpleBlocks(const vector<Box>& boxes,
             int maxY = W / bw;
             int maxZ = H / bh;
             // Asegurar no exceder cantidad disponible
-            maxX = std::min(maxX, box.quantity);
-            maxY = std::min(maxY, box.quantity);
-            maxZ = std::min(maxZ, box.quantity);
+            const int MAX_PER_DIM = 12;  // ajustable según experimentación (para no generar bloques gigantes)
+            maxX = min(maxX, MAX_PER_DIM);
+            maxY = min(maxY, MAX_PER_DIM);
+            maxZ = min(maxZ, MAX_PER_DIM);
 
             for (int nx = 1; nx <= maxX; nx++) {
                 for (int ny = 1; ny <= maxY; ny++) {
@@ -236,24 +224,22 @@ double evaluateBlock(const Block& b, const Cuboid& r,
                      KnapsackCache& cache) {
     if (!b.fitsIn(r)) return -1e9;
 
-    // Dimensiones restantes después de colocar b
     int capX = r.l - b.l;
     int capY = r.w - b.w;
     int capZ = r.h - b.h;
     if (capX < 0 || capY < 0 || capZ < 0) return -1e9;
 
-    // Recoger dimensiones de cajas restantes (todas las orientaciones válidas)
+    // Recoger dimensiones de cajas restantes
     vector<int> lengths, widths, heights;
     for (const auto& box : remaining) {
         if (box.quantity <= 0) continue;
         auto orients = getOrientations(box);
-        for (auto& [l,w,h] : orients) {
+        for (auto& [l, w, h] : orients) {
             lengths.push_back(l);
             widths.push_back(w);
             heights.push_back(h);
         }
     }
-    // Eliminar duplicados para eficiencia (opcional)
     sort(lengths.begin(), lengths.end());
     lengths.erase(unique(lengths.begin(), lengths.end()), lengths.end());
     sort(widths.begin(), widths.end());
@@ -261,31 +247,34 @@ double evaluateBlock(const Block& b, const Cuboid& r,
     sort(heights.begin(), heights.end());
     heights.erase(unique(heights.begin(), heights.end()), heights.end());
 
-    // Firmar las cajas restantes para cache
+    // FIX: la key del cache combina firma de cajas + capacidad del eje
+    // Así dos espacios distintos con igual firma pero distinta capacidad
+    // no colisionan, evitando accesos fuera de bounds.
     size_t sig = boxesSignature(remaining);
-
-    // Obtener o calcular tablas DP
-    auto getKnap = [&](unordered_map<size_t, vector<int>>& cacheMap,
-                       int cap, const vector<int>& dims) -> const vector<int>& {
-        auto it = cacheMap.find(sig);
-        if (it == cacheMap.end()) {
-            // Calcular para todas las capacidades hasta cap (máximo necesario)
-            // En realidad solo necesitamos hasta cap, pero podríamos guardar para cada capacidad.
-            // Para simplificar, calculamos hasta cap y guardamos.
-            auto newEntry = unboundedKnapsack(cap, dims);
-            cacheMap[sig] = move(newEntry);
-            it = cacheMap.find(sig);
-        }
-        return it->second;
+    auto makeKey = [](size_t s, int cap) -> size_t {
+        return s ^ (static_cast<size_t>(cap) * 2654435761ULL);
     };
 
-    const auto& bestL = getKnap(cache.cacheLength, capX, lengths);
-    const auto& bestW = getKnap(cache.cacheWidth, capY, widths);
-    const auto& bestH = getKnap(cache.cacheHeight, capZ, heights);
+    auto getKnap = [&](unordered_map<size_t, int>& cacheMap,
+                       int cap, const vector<int>& dims) -> int {
+        if (cap <= 0) return 0;
+        size_t key = makeKey(sig, cap);
+        auto it = cacheMap.find(key);
+        if (it != cacheMap.end()) return it->second;
+        // Calcular knapsack solo para esta capacidad específica
+        vector<int> best(cap + 1, 0);
+        for (int c = 1; c <= cap; ++c)
+            for (int d : dims)
+                if (d <= c && best[c - d] + d > best[c])
+                    best[c] = best[c - d] + d;
+        int result = best[cap];
+        cacheMap[key] = result;
+        return result;
+    };
 
-    int lmax = bestL[capX];
-    int wmax = bestW[capY];
-    int hmax = bestH[capZ];
+    int lmax = getKnap(cache.cacheLength, capX, lengths);
+    int wmax = getKnap(cache.cacheWidth,  capY, widths);
+    int hmax = getKnap(cache.cacheHeight, capZ, heights);
 
     double usableVol = (double)(b.l + lmax) * (b.w + wmax) * (b.h + hmax);
     double vloss = (double)r.volume() - usableVol;

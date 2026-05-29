@@ -26,4 +26,5 @@ Solution beamSearch(Container& initialContainer,
                     vector<Box>& boxes,
                     vector<Block>& blocks,
                     int beamWidth,
-                    int timeLimitSeconds);
+                    int timeLimitSeconds, 
+                    bool stronglyHeterogeneous);

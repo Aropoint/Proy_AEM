@@ -53,8 +53,15 @@ double evaluateState(State& s, const vector<Box>& allBoxes, vector<Block>& block
     Solution tempSol = greedySolve(tempContainer, tempBoxes, blocks, s.knapCache);
     double volume = s.volumeUsed + tempSol.volumeUtilization();
 
+    // FIX: la signature incluye cajas ya colocadas + las que agrega el greedy.
+    // Sin esto, dos estados con distinta historia pero igual completion
+    // parecen idénticos y removeSimilarStates elimina estados válidos.
     vector<int> sig(allBoxes.size() + 1, 0);
-    for (const auto& pb : tempSol.placedBoxes) {
+    for (const auto& pb : s.container.placed) {   // ya colocadas
+        if (pb.boxId >= 1 && pb.boxId < (int)sig.size())
+            sig[pb.boxId]++;
+    }
+    for (const auto& pb : tempSol.placedBoxes) {  // greedy-completion
         if (pb.boxId >= 1 && pb.boxId < (int)sig.size())
             sig[pb.boxId]++;
     }
@@ -66,7 +73,8 @@ Solution beamSearch(Container& initialContainer,
                     vector<Box>& boxes,
                     vector<Block>& blocks,
                     int beamWidth,
-                    int timeLimitSeconds) {
+                    int timeLimitSeconds,
+                    bool stronglyHeterogeneous) {
     auto startTime = time(nullptr);
 
     State initialState{initialContainer, boxes, 0.0, 0, 0.0, {}, KnapsackCache()};
@@ -84,6 +92,14 @@ Solution beamSearch(Container& initialContainer,
         bool isRoot = (iteration == 0 && currentBeam.size() == 1);
 
         for (const auto& parentState : currentBeam) {
+            double remainingVolume = 0.0;
+            for (const auto& rb : parentState.remainingBoxes) {
+                remainingVolume += (double)rb.l * rb.w * rb.h * rb.quantity;
+            }
+            if (parentState.volumeUsed + remainingVolume <= bestState.volumeUsed) {
+                continue; // este estado no puede mejorar la mejor solución
+            }
+
             Container tempContainer = parentState.container;
             int spaceIdx = tempContainer.selectFreeSpace();
             if (spaceIdx == -1) {
@@ -159,8 +175,14 @@ Solution beamSearch(Container& initialContainer,
         sort(allSuccessors.begin(), allSuccessors.end(),
              [](const auto& a, const auto& b) { return a.greedyScore > b.greedyScore; });
 
-        int adaptiveW = adaptiveBeamWidth(allSuccessors, beamWidth, beamWidth*2);
-        int keep = min(adaptiveW, (int)allSuccessors.size());
+        int keep;
+        if (stronglyHeterogeneous) {
+            // Ancho fijo pequeño para instancias heterogéneas
+            keep = min(10, (int)allSuccessors.size());
+        } else {
+            int adaptiveW = adaptiveBeamWidth(allSuccessors, beamWidth, beamWidth*2);
+            keep = min(adaptiveW, (int)allSuccessors.size());
+        }
 
         currentBeam.clear();
         for (int i = 0; i < keep; ++i)

@@ -73,32 +73,63 @@ int main(int argc, char* argv[]) {
     int index = (argc >= 3) ? stoi(argv[2]) : 0;
 
     try {
-        Instance inst = parseInstance(filename, index);
+       Instance inst = parseInstance(filename, index);
         
-        cout << "\n=== INSTANCIA ===" << endl;
-        cout << "Contenedor: " << inst.container.L << " x " 
-             << inst.container.W << " x " << inst.container.H << endl;
-        cout << "Tipos de caja: " << inst.boxes.size() << endl;
-        cout << "Volumen teórico utilizable: " 
-             << fixed << setprecision(1) 
-             << (inst.totalBoxVolume() / inst.containerVolume() * 100.0) << "%" << endl;
-        
-        // Generar bloques (sin límite de 10 en simple blocks)
-        double minFillRate = (index < 8) ? 1.0 : 0.98;
-        int maxBlocks = 20000;
-        
-        auto startGen = chrono::high_resolution_clock::now();
-        vector<Block> blocks = generateBlocks(inst.boxes, 
-                                              inst.container.L, 
-                                              inst.container.W, 
-                                              inst.container.H,
-                                              maxBlocks,
-                                              minFillRate);
-        auto endGen = chrono::high_resolution_clock::now();
-        double timeGen = chrono::duration<double>(endGen - startGen).count();
-        
-        cout << "\nBloques generados: " << blocks.size() 
-             << " (tiempo: " << fixed << setprecision(3) << timeGen << "s)" << endl;
+cout << "\n=== INSTANCIA ===" << endl;
+cout << "Contenedor: " << inst.container.L << " x " 
+     << inst.container.W << " x " << inst.container.H << endl;
+cout << "Tipos de caja: " << inst.boxes.size() << endl;
+cout << "Volumen teórico utilizable: " 
+     << fixed << setprecision(1) 
+     << (inst.totalBoxVolume() / inst.containerVolume() * 100.0) << "%" << endl;
+
+// =====================================================
+// Parámetros adaptativos según el grupo BR
+// =====================================================
+string filename = argv[1];
+int setNumber = 0;
+size_t pos = filename.find("BR");
+if (pos != string::npos) {
+    setNumber = stoi(filename.substr(pos+2));
+}
+bool stronglyHeterogeneous = (setNumber >= 8);
+
+// Valores por defecto para BR0-BR7 (débilmente heterogéneos)
+int maxBlocks;
+double minFillRate;      // solo bloques simples
+int maxBeamWidth;         // ancho máximo del haz
+int totalTimeLimit;       // segundos por instancia
+
+if (stronglyHeterogeneous) {
+    maxBlocks = 8000;          // menos bloques para acelerar
+    minFillRate = 0.98;        // bloques más densos (casi llenos)
+    totalTimeLimit = 120;      // más tiempo (ajústalo según tu hardware)
+    maxBeamWidth = 15;         // ancho de haz pequeño
+}else{
+    maxBlocks = 20000;         // más bloques para aprovechar la homogeneidad
+    minFillRate = 1.0;        // solo bloques simples (100% llenos)
+    totalTimeLimit = 30;      // tiempo moderado
+    maxBeamWidth = 20;        // FIX: w>20 con 20000 bloques agota el tiempo sin completar una iteracion
+}
+
+// Opcional: permitir pasar el tiempo por línea de comandos
+if (argc >= 4) {
+    totalTimeLimit = stoi(argv[3]);
+}
+
+// Generar bloques
+auto startGen = chrono::high_resolution_clock::now();
+vector<Block> blocks = generateBlocks(inst.boxes, 
+                                      inst.container.L, 
+                                      inst.container.W, 
+                                      inst.container.H,
+                                      maxBlocks,
+                                      minFillRate);
+auto endGen = chrono::high_resolution_clock::now();
+double timeGen = chrono::duration<double>(endGen - startGen).count();
+
+cout << "\nBloques generados: " << blocks.size() 
+     << " (tiempo: " << fixed << setprecision(3) << timeGen << "s)" << endl;
         
         // ===================================================================
         // ALGORITMO GREEDY (con cache dummy)
@@ -127,7 +158,6 @@ int main(int argc, char* argv[]) {
         Solution bestBeamSol = greedySol;
         double bestBeamUtil = greedyUtil;
         int w = 1;
-        const int totalTimeLimit = 30;  // segundos por instancia (ajustable)
         auto startTotal = chrono::steady_clock::now();
         int iteration = 0;
         
@@ -140,7 +170,8 @@ int main(int argc, char* argv[]) {
             
             Container containerBeam(inst.container.L, inst.container.W, inst.container.H);
             auto startBeam = chrono::high_resolution_clock::now();
-            Solution beamSol = beamSearch(containerBeam, inst.boxes, blocks, w, remainingTime);
+            int currentW = min(w, maxBeamWidth);
+            Solution beamSol = beamSearch(containerBeam, inst.boxes, blocks, currentW, remainingTime, stronglyHeterogeneous);
             auto endBeam = chrono::high_resolution_clock::now();
             double timeBeam = chrono::duration<double>(endBeam - startBeam).count();
             
@@ -156,6 +187,7 @@ int main(int argc, char* argv[]) {
             
             // Duplicar esfuerzo según el paper: w = ceil(sqrt(2) * w)
             w = max(2, (int)ceil(sqrt(2.0) * w));
+            if (w > maxBeamWidth * 2) break;
             iteration++;
             if (iteration > 20) break; // seguridad
         }
@@ -190,6 +222,9 @@ int main(int argc, char* argv[]) {
         cout << "Beam Search:       " << fixed << setprecision(2) << bestBeamUtil << "%" << endl;
         cout << "Teórico máximo:    " << fixed << setprecision(2) 
              << (inst.totalBoxVolume() / inst.containerVolume() * 100.0) << "%" << endl;
+        cout << "Conjunto BR: " << setNumber << " - Heterogéneo: " << stronglyHeterogeneous << endl;
+        cout << "maxBlocks: " << maxBlocks << ", minFillRate: " << minFillRate 
+        << ", timeLimit: " << totalTimeLimit << ", maxBeamWidth: " << maxBeamWidth << endl;
         
         double improvement = (bestBeamUtil - greedyUtil) / greedyUtil * 100.0;
         cout << "\nMejoría Beam Search sobre Greedy: " << fixed << setprecision(2) << improvement << "%" << endl;
